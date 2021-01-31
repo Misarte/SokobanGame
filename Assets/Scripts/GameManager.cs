@@ -132,6 +132,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Build level");
         levelBuilder.BuildLevel();
         _player = FindObjectOfType<Player>();
+        _player.moves.Clear();
         Debug.Log("Scene Loaded" + levelBuilder.GetComponent<LevelManager>()._levels.Count.ToString() + "Number of levels");
     }
 }
