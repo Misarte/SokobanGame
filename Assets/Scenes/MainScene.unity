@@ -154,6 +154,8 @@ MonoBehaviour:
   levelBuilder: {fileID: 1589199542}
   nextButton: {fileID: 1027286553}
   undoButton: {fileID: 1390427127}
+  yayParticles: {fileID: 5314114684922226524, guid: 1600d01b603fbc04aa39fd93200b871f,
+    type: 3}
   moves: {fileID: 162948963}
   currLevel: {fileID: 1736692618}
 --- !u!4 &56389116
