@@ -12,13 +12,17 @@ public class GameManager : MonoBehaviour
     public LevelBuilder levelBuilder;
     public GameObject nextButton;
     public GameObject undoButton;
+    public GameObject yayParticles;
     public Text moves;
     public Text currLevel;
+    private GameObject _win_vfx;
+    private bool _playedVfx;
 
     private void Start()
     {
         levelBuilder = FindObjectOfType<LevelBuilder>();
         ResetScene();
+        _playedVfx = false;
     }
 
     // Update is called once per frame
@@ -29,6 +33,13 @@ public class GameManager : MonoBehaviour
         if (_player)
         {
             nextButton.SetActive(IsLevelComplete());
+            if (!_playedVfx && IsLevelComplete())
+            {
+                GameObject win_vfx = Instantiate(yayParticles, _player.transform.position, Quaternion.identity);
+                _playedVfx = true;
+                Destroy(win_vfx, 10.0f);
+            }
+            
             if (movementInput.sqrMagnitude > 0.5) // check pressed button to move once at a time
             {
                 if (_readyForInput)// only true when button pressed once
@@ -63,11 +74,14 @@ public class GameManager : MonoBehaviour
         nextButton.SetActive(false);
         levelBuilder.NextLevel();
         StartCoroutine(ResetSceneAsync());
-
+        ParticleSystem currentVfx = FindObjectOfType<ParticleSystem>();
+        Destroy(currentVfx);
     }
     public void ResetScene()
     {
         StartCoroutine(ResetSceneAsync());
+        ParticleSystem currentVfx = FindObjectOfType<ParticleSystem>();
+        Destroy(currentVfx);
     }
 
     public void Undo()
@@ -98,6 +112,8 @@ public class GameManager : MonoBehaviour
     public void Quit()
     {
         Application.Quit();
+        _player.moves.Clear();
+        Destroy(yayParticles.gameObject);
     }
 
     private bool IsLevelComplete()
