@@ -12,13 +12,17 @@ public class GameManager : MonoBehaviour
     public LevelBuilder levelBuilder;
     public GameObject nextButton;
     public GameObject undoButton;
+    public GameObject yayParticles;
     public Text moves;
     public Text currLevel;
-    private Camera camera;
+    private GameObject _win_vfx;
+    private bool _playedVfx;
 
     private void Start()
     {
+        levelBuilder = FindObjectOfType<LevelBuilder>();
         ResetScene();
+        _playedVfx = false;
     }
 
     // Update is called once per frame
@@ -29,6 +33,13 @@ public class GameManager : MonoBehaviour
         if (_player)
         {
             nextButton.SetActive(IsLevelComplete());
+            if (!_playedVfx && IsLevelComplete())
+            {
+                GameObject win_vfx = Instantiate(yayParticles, _player.transform.position, Quaternion.identity);
+                _playedVfx = true;
+                Destroy(win_vfx, 10.0f);
+            }
+            
             if (movementInput.sqrMagnitude > 0.5) // check pressed button to move once at a time
             {
                 if (_readyForInput)// only true when button pressed once
@@ -63,16 +74,19 @@ public class GameManager : MonoBehaviour
         nextButton.SetActive(false);
         levelBuilder.NextLevel();
         StartCoroutine(ResetSceneAsync());
-
+        ParticleSystem currentVfx = FindObjectOfType<ParticleSystem>();
+        Destroy(currentVfx);
     }
     public void ResetScene()
     {
         StartCoroutine(ResetSceneAsync());
+        ParticleSystem currentVfx = FindObjectOfType<ParticleSystem>();
+        Destroy(currentVfx);
     }
 
     public void Undo()
     {
-        if(_player.moves.Count > 0)
+        if (_player.moves.Count > 0)
         {
             if (_player.moves.Peek().withBox)
             {
@@ -86,7 +100,7 @@ public class GameManager : MonoBehaviour
                 Debug.Log("Undoing Only Player to: " + _player.transform.position.ToString());
             }
             _player.moves.Pop();
-           --_player.num_moves;
+            --_player.num_moves;
         }
         else
         {
@@ -95,12 +109,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void Quit()
+    {
+        Application.Quit();
+        _player.moves.Clear();
+        Destroy(yayParticles.gameObject);
+    }
+
     private bool IsLevelComplete()
     {
         Box[] boxes = FindObjectsOfType<Box>();
-        foreach(var box in boxes)
+        foreach (var box in boxes)
         {
-            if(!box.arrived)
+            if (!box.arrived)
             {
                 return false;
             }
@@ -110,10 +131,10 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ResetSceneAsync()
     {
-        if(SceneManager.sceneCount > 1)
+        if (SceneManager.sceneCount > 1)
         {
             AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync("LevelScene");
-            while(!asyncUnload.isDone)
+            while (!asyncUnload.isDone)
             {
                 yield return null;
                 Debug.Log("Unloading scene...");
@@ -129,10 +150,10 @@ public class GameManager : MonoBehaviour
             Debug.Log("Loading scene...");
         }
         SceneManager.SetActiveScene(SceneManager.GetSceneByName("LevelScene"));
+        Debug.Log("Build level");
         levelBuilder.BuildLevel();
         _player = FindObjectOfType<Player>();
         _player.moves.Clear();
-        Debug.Log("Scene Loaded");
-        camera = Camera.main;
+        Debug.Log("Scene Loaded" + levelBuilder.GetComponent<LevelManager>()._levels.Count.ToString() + "Number of levels");
     }
 }
