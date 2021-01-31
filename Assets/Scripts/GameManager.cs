@@ -17,37 +17,45 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        levelBuilder = FindObjectOfType<LevelBuilder>();
         ResetScene();
     }
-
 
     // Update is called once per frame
     void Update()
     {
         Vector2 movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")); // read keyboard input
-        movementInput.Normalize(); 
-
-        if(movementInput.sqrMagnitude > 0.5) // check pressed button to move once at a time
+        movementInput.Normalize();
+        if (_player)
         {
-            if(_readyForInput)// only true when button pressed once
+            nextButton.SetActive(IsLevelComplete());
+            if (movementInput.sqrMagnitude > 0.5) // check pressed button to move once at a time
             {
-                _readyForInput = false;
-                _player.Move(movementInput);
-                nextButton.SetActive(IsLevelComplete());
+                if (_readyForInput)// only true when button pressed once
+                {
+                    _readyForInput = false;
+                    _player.Move(movementInput);
+                    nextButton.SetActive(IsLevelComplete());
+                }
             }
-        }
-        else
-        {
-            _readyForInput = true;
-        }
+            else
+            {
+                _readyForInput = true;
+            }
 
-        if(_player.num_moves > 0)
-        {
-            undoButton.SetActive(true);
+            if (_player.num_moves > 0)
+            {
+                undoButton.SetActive(true);
+            }
+            else
+            {
+                undoButton.SetActive(false);
+                Debug.Log("No more moves to undo!");
+            }
+            moves.text = "NUMBER OF MOVES: " + _player.num_moves.ToString();
+            currLvl = levelBuilder._currentLevel + 1;
+            currLevel.text = "CURRENT LEVEL: " + currLvl.ToString();
         }
-        moves.text = "Number of Moves: " + _player.num_moves.ToString();
-        currLvl = levelBuilder._currentLevel + 1;
-        currLevel.text = "Current Level: " + currLvl.ToString();
     }
 
     public void NextLevel()
@@ -64,17 +72,35 @@ public class GameManager : MonoBehaviour
 
     public void Undo()
     {
-        _player.transform.position = new Vector3(_player.moves.Peek().fromPos.x, _player.moves.Peek().fromPos.y, _player.moves.Peek().fromPos.z);
-        Debug.Log("Undoing to: " + _player.transform.position.ToString());
-        _player.moves.Pop();
+        if (_player.moves.Count > 0)
+        {
+            if (_player.moves.Peek().withBox)
+            {
+                _player.transform.position = new Vector3(_player.moves.Peek().fromPos.x, _player.moves.Peek().fromPos.y, _player.moves.Peek().fromPos.z);
+                Debug.Log("Undoing to: " + _player.transform.position.ToString() + "undoing Box too!");
+                _player.moves.Peek().whichBox.transform.position = new Vector3(_player.moves.Peek().boxPos.x, _player.moves.Peek().boxPos.y, _player.moves.Peek().boxPos.z);
+            }
+            else
+            {
+                _player.transform.position = new Vector3(_player.moves.Peek().fromPos.x, _player.moves.Peek().fromPos.y, _player.moves.Peek().fromPos.z);
+                Debug.Log("Undoing Only Player to: " + _player.transform.position.ToString());
+            }
+            _player.moves.Pop();
+            --_player.num_moves;
+        }
+        else
+        {
+            undoButton.SetActive(false);
+            Debug.Log("No more moves to undo!");
+        }
     }
 
     private bool IsLevelComplete()
     {
         Box[] boxes = FindObjectsOfType<Box>();
-        foreach(var box in boxes)
+        foreach (var box in boxes)
         {
-            if(!box.arrived)
+            if (!box.arrived)
             {
                 return false;
             }
@@ -84,10 +110,10 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ResetSceneAsync()
     {
-        if(SceneManager.sceneCount > 1)
+        if (SceneManager.sceneCount > 1)
         {
             AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync("LevelScene");
-            while(!asyncUnload.isDone)
+            while (!asyncUnload.isDone)
             {
                 yield return null;
                 Debug.Log("Unloading scene...");
@@ -103,11 +129,9 @@ public class GameManager : MonoBehaviour
             Debug.Log("Loading scene...");
         }
         SceneManager.SetActiveScene(SceneManager.GetSceneByName("LevelScene"));
+        Debug.Log("Build level");
         levelBuilder.BuildLevel();
         _player = FindObjectOfType<Player>();
-        Debug.Log("Scene Loaded");
-
+        Debug.Log("Scene Loaded" + levelBuilder.GetComponent<LevelManager>()._levels.Count.ToString() + "Number of levels");
     }
- 
-
 }
