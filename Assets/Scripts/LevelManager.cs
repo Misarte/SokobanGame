@@ -48,8 +48,7 @@ public class LevelManager : MonoBehaviour
         {
             Debug.Log("Levels imported!");
         }
-
-
+        
         string _levelsText = text.text;
         string[] lines;
 

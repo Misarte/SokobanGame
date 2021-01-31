@@ -20,8 +20,11 @@ public class Box : MonoBehaviour
             return true;
         }
     }
-
-
+    
+    private void Update()
+    {
+        ArrivedOnCross();
+    }
     public bool IsBoxBlocked(Vector3 position, Vector2 direction)
     {
         Vector2 newPos = new Vector2(position.x, position.y) + direction;
