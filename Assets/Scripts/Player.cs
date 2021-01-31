@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 public struct Moves
 {
@@ -22,7 +23,17 @@ public class Player : MonoBehaviour
     public int num_moves;
     public Stack<Moves> moves = new Stack<Moves>();
     public Moves move;
+    public Subject<Player> OnMovedBox = new Subject<Player>();
+    public Subject<Player> OnMovedAlone = new Subject<Player>();
+    [Space]
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _walk;
+    [SerializeField] private AudioClip _push;
 
+    public void Awake()
+    {
+        InitializeAudio();
+    }
     public bool Move(Vector2 direction)
     {
         if (Mathf.Abs(direction.x) < 0.5)//block diagonal move
@@ -69,7 +80,7 @@ public class Player : MonoBehaviour
                 move.withBox = false;
                 moves.Push(move);
                 Debug.Log("Moved from: " + move.fromPos.ToString() + "Towards: " + move.toPos.ToString() + "Without Box");
-
+                OnMovedAlone.OnNext(this);
                 transform.Translate(direction);
                 num_moves++;
             }
@@ -109,7 +120,7 @@ public class Player : MonoBehaviour
                 {
                     blocked.isBlocked = false;
                     blocked.isBlockedByBox = true;
-
+                    OnMovedBox.OnNext(this);
                     return blocked;
                 }
                 else
@@ -122,6 +133,31 @@ public class Player : MonoBehaviour
         }
         blocked.isBlocked = false;
         blocked.isBlockedByBox = false;
+        
         return blocked;
+    }
+
+    private void InitializeAudio()
+    {
+        OnMovedBox.Subscribe(_ =>
+        {
+            _audioSource.Stop();
+            PlaySound(_push, 0.5f);
+            Debug.Log("PUSH");
+
+        });
+        OnMovedAlone.Subscribe(_ =>
+        {
+            _audioSource.Stop();
+            PlaySound(_walk, 0.3f);
+            Debug.Log("WALK");
+        });
+    }
+
+    private void PlaySound(AudioClip clip, float volume)
+    {
+        //_audioSource.Stop();
+        _audioSource.volume = volume;
+        _audioSource.PlayOneShot(clip);
     }
 }
