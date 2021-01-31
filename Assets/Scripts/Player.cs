@@ -142,7 +142,7 @@ public class Player : MonoBehaviour
         OnMovedBox.Subscribe(_ =>
         {
             _audioSource.Stop();
-            PlaySound(_push, 0.5f);
+            PlaySound(_push, 3.7f);
             Debug.Log("PUSH");
 
         });
