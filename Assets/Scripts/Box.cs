@@ -21,7 +21,10 @@ public class Box : MonoBehaviour
         }
     }
 
-
+    private void Update()
+    {
+        ArrivedOnCross();
+    }
     public bool IsBoxBlocked(Vector3 position, Vector2 direction)
     {
         Vector2 newPos = new Vector2(position.x, position.y) + direction;
@@ -52,9 +55,9 @@ public class Box : MonoBehaviour
     {
         GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot");
         SpriteRenderer boxColor = GetComponent<SpriteRenderer>();
-        foreach(var slot in slots)
+        foreach (var slot in slots)
         {
-            if(transform.position.x == slot.transform.position.x && transform.position.y == slot.transform.position.y)
+            if (transform.position.x == slot.transform.position.x && transform.position.y == slot.transform.position.y)
             {
                 boxColor.color = Color.green;
                 arrived = true;
