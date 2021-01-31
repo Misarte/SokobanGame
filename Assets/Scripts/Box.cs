@@ -20,7 +20,7 @@ public class Box : MonoBehaviour
             return true;
         }
     }
-
+    
     private void Update()
     {
         ArrivedOnCross();
@@ -55,9 +55,9 @@ public class Box : MonoBehaviour
     {
         GameObject[] slots = GameObject.FindGameObjectsWithTag("Slot");
         SpriteRenderer boxColor = GetComponent<SpriteRenderer>();
-        foreach (var slot in slots)
+        foreach(var slot in slots)
         {
-            if (transform.position.x == slot.transform.position.x && transform.position.y == slot.transform.position.y)
+            if(transform.position.x == slot.transform.position.x && transform.position.y == slot.transform.position.y)
             {
                 boxColor.color = Color.green;
                 arrived = true;
