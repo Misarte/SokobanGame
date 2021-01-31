@@ -95,6 +95,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void Quit()
+    {
+        Application.Quit();
+    }
+
     private bool IsLevelComplete()
     {
         Box[] boxes = FindObjectsOfType<Box>();
