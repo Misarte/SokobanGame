@@ -19,7 +19,7 @@ public class LevelBuilder : MonoBehaviour
     GameObject GetPrefab(char c)
     {
         LevelElement elm = _lvlElements.Find(le => le._character == c.ToString());
-        if(elm != null)
+        if (elm != null)
         {
             return elm._prefab;
         }
@@ -32,7 +32,7 @@ public class LevelBuilder : MonoBehaviour
     public void NextLevel()
     {
         _currentLevel++;
-        if(_currentLevel >= GetComponent<LevelManager>()._levels.Count)
+        if (_currentLevel >= GetComponent<LevelManager>()._levels.Count)
         {
             _currentLevel = 0; //go back to first level
         }
@@ -41,19 +41,20 @@ public class LevelBuilder : MonoBehaviour
     public void BuildLevel()
     {
         _level = GetComponent<LevelManager>()._levels[_currentLevel];
-
+        Debug.Log("Tryig to build...");
         int startX = -_level.Width / 2; // center of screen should be center of level
         int x = startX;
         int y = -_level.Height / 2;
-
-        foreach(var row in _level._rows)
+        Debug.Log("Rows are: " + _level._rows.Count.ToString());
+        foreach (var row in _level._rows)
         {
-            foreach(var ch in row)
+            foreach (var ch in row)
             {
                 Debug.Log(ch);
                 GameObject prefab = GetPrefab(ch);
-                if(prefab)
+                if (prefab)
                 {
+                    Debug.Log("Instantiating prefab...");
                     Debug.Log(prefab.name);
                     Instantiate(prefab, new Vector3(x, y, 0), Quaternion.identity);
                 }
